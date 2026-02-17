@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <form>
+        <input type="text" placeholder="Add Task">
+        <button>Add</button>
+    </form>
+    <ul></ul>
+  </body>
+
+  <script>
+    const userInput = document.querySelector("input");
+    const submitButton = document.querySelector("button");
+    const taskList = document.querySelector("ul");
+    
+    function submitTask(e) {
+        e.preventDefault();
+
+        const listItem = document.createElement("li");
+        const itemWrapper = document.createElement("div");
+        const taskDescription = document.createElement("span");
+        const taskDone = document.createElement("input");
+        
+        taskDescription.textContent = userInput.value;
+        taskDone.type = "checkbox";
+        
+        itemWrapper.appendChild(taskDescription);
+        itemWrapper.appendChild(taskDone);
+
+        listItem.appendChild(itemWrapper);
+        taskList.appendChild(listItem);
+
+        taskDone.addEventListener("change", () => {
+            listItem.remove();
+        });
+    }
+
+    submitButton.addEventListener("click", submitTask);
+  </script>
+</html>
