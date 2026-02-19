@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Todo App</title>
   </head>
 
   <body>
@@ -19,7 +19,7 @@
           <form action="{% url 'remove-task' %}" method="post">
             {% csrf_token %}
             <span>{{ task.task_description }}</span>
-            <input type="checkbox" value="{{ task.is_done }}">
+            <input type="checkbox" {% if task.is_done %}checked{% endif %} class="status-checkbox">
             <input type="hidden" name="task" value="{{ task.task_description }}">
             <button>Remove</button>
           </form>
@@ -27,5 +27,57 @@
       </li>
       {% endfor %}
     </ul>
+
+    <input type="hidden" id="update-api-url" value="{% url 'update-status' %}">
+    
+    <script>
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (`${name}=`)) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+      }
+      const csrftoken = getCookie('csrftoken');
+
+      const statusCheckboxes = document.querySelectorAll(".status-checkbox");
+      const updateURL = document.getElementById("update-api-url").value;
+
+      function changeStatus(event) {
+        const checkbox = event.target;
+        const taskInput = checkbox.parentElement.querySelector('input[name="task"]');
+        const payload = {
+          isDone: checkbox.checked,
+          task_description: taskInput.value 
+        };
+
+        fetch(updateURL, {
+          method: "PUT",
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken 
+          },
+          body: JSON.stringify(payload) 
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Updated:", data);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+      }
+      
+      statusCheckboxes.forEach(checkbox => {
+          checkbox.addEventListener("change", changeStatus);
+      });
+    </script>
   </body>
 </html>
