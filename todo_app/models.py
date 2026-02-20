@@ -9,3 +9,11 @@ class TaskModel(models.Model):
 
     def __str__(self):
         return self.task_description
+    
+
+class UserModel(models.Model):
+    username = models.CharField(max_length=50)
+    hashed_password = models.CharField(max_length=100) 
+
+    def __str__(self):
+        return self.username
