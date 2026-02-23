@@ -55,7 +55,7 @@
         const taskInput = checkbox.parentElement.querySelector('input[name="task"]');
         const payload = {
           isDone: checkbox.checked,
-          task_description: taskInput.value 
+          task_description: taskInput.value,
         };
 
         fetch(updateURL, {

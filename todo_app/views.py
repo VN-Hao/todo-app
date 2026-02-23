@@ -24,37 +24,71 @@ def verify_credential(request):
         if user.hashed_password != hashed_password:
             return login(request, status_msg="Incorrect password", status_code=401)
 
+        # Store session_id in the user's session
+        request.session["session_id"] = "user-" + str(user.username)
         return redirect("app-page")
     except UserModel.DoesNotExist:
         return login(request, status_msg="Invalid username", status_code=401)
 
 
 def main_app(request):
-    all_tasks = TaskModel.objects.all()
+    try:
+        # Retrieve session_id from the session
+        session_id = request.session["session_id"]
+        username = session_id[5:]
+        all_tasks = TaskModel.objects.filter(username=username)
 
-    return render(request, "todo_app/index.html", {"all_tasks": all_tasks})
+        return render(
+            request,
+            "todo_app/index.html",
+            {"all_tasks": all_tasks, "username": username},
+        )
+    except:
+        return HttpResponse("Please log in first!")
 
 
 def add_task(request):
-    TaskModel.objects.create(task_description=request.POST["task"], is_done=False)
+    if "session_id" not in request.session:
+        return redirect("login-page")
+
+    session_id = request.session["session_id"]
+    username = session_id[5:]
+
+    task_description = request.POST["task"]
+    TaskModel.objects.create(
+        task_description=task_description, is_done=False, username=username
+    )
 
     return redirect("app-page")
 
 
 def remove_task(request):
-    task = request.POST["task"]
-    TaskModel.objects.get(task_description=task).delete()
+    if "session_id" not in request.session:
+        return redirect("login-page")
+
+    session_id = request.session["session_id"]
+    username = session_id[5:]
+
+    task_description = request.POST["task"]
+
+    TaskModel.objects.get(username=username, task_description=task_description).delete()
     return redirect("app-page")
 
 
 def update_status(request):
+    if "session_id" not in request.session:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    session_id = request.session["session_id"]
+    username = session_id[5:]
+
     if request.method == "PUT":
         data = json.loads(request.body)
         task_desc = data.get("task_description")
         is_done = data.get("isDone")
 
         try:
-            task = TaskModel.objects.get(task_description=task_desc)
+            task = TaskModel.objects.get(username=username, task_description=task_desc)
             task.is_done = is_done
             task.save()
             return JsonResponse(
