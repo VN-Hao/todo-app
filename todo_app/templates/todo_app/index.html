@@ -28,7 +28,11 @@
       {% endfor %}
     </ul>
 
+    <button id="logout-button">Log out</button>
+
     <input type="hidden" id="update-api-url" value="{% url 'update-status' %}">
+    <input type="hidden" id="login-page-url" value="{% url 'login-page' %}">
+    <input type="hidden" id="logout-api-url" value="{% url 'logout' %}">
     
     <script>
       function getCookie(name) {
@@ -78,6 +82,31 @@
       statusCheckboxes.forEach(checkbox => {
           checkbox.addEventListener("change", changeStatus);
       });
+
+      const logoutButton = document.getElementById("logout-button");
+      const loginPageURL = document.getElementById("login-page-url");
+      const logoutURL = document.getElementById("logout-api-url");
+
+      function logout() {
+        fetch(logoutURL.value, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            window.location.href = loginPageURL.value;
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+      }
+      
+      logoutButton.addEventListener("click", logout);
     </script>
   </body>
 </html>

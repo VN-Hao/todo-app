@@ -7,5 +7,6 @@ urlpatterns = [
     path("api/verify-credential", views.verify_credential, name="verify-credential"),
     path("api/add-task/", views.add_task, name="add-task"),
     path("api/remove-task/", views.remove_task, name="remove-task"),
-    path("api/update-status/", views.update_status, name="update-status")
+    path("api/update-status/", views.update_status, name="update-status"),
+    path("api/logout/", views.logout, name="logout")
 ]

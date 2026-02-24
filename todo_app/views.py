@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.cache import never_cache
 from .models import TaskModel, UserModel
 import json
 import hashlib
@@ -31,6 +32,7 @@ def verify_credential(request):
         return login(request, status_msg="Invalid username", status_code=401)
 
 
+@never_cache
 def main_app(request):
     try:
         # Retrieve session_id from the session
@@ -98,3 +100,13 @@ def update_status(request):
             return JsonResponse({"error": "Task not found"}, status=404)
 
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
+def logout(request):
+    try:
+        del request.session['session_id']
+    except KeyError:
+        pass
+
+    request.session.flush()
+
+    return JsonResponse({"message": "Log out successfully"})
